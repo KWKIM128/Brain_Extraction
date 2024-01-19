@@ -11,7 +11,9 @@ import statistics as s
 from torchsummary import summary
 import numpy as np
 
-from Unet import UNet, UNet_less
+from rgunetv5 import RGUNetv5
+from lighterunet import LighterUnet
+from rgunet import RGUNet
 
 if __name__ == '__main__':
     """ Seeding """
@@ -24,12 +26,12 @@ if __name__ == '__main__':
     
     """ model """
     device = torch.device('cuda')
-    model = UNet_less()
+    model = RGUNet()
     model = model.to(device)
     
     """ Path """
-    checkpoint_path = 'checkpoint/smaller/unet_less/checpoint.pth' # change this 
-    results = 'C:/Users/C21048176/Brain Extraction/nifti_results/smaller/unet_less/training/'
+    checkpoint_path = 'checkpoint/proposed/rgunet/checpoint.pth' # change this 
+    results = 'nifti_results/proposed/rgunet/train/'
     
     """Transform"""
     train_transform = A.Compose(
@@ -52,39 +54,34 @@ if __name__ == '__main__':
             ])
     
     """ Dataset """
-    t1_trainx = sorted(glob('C:/Users/C21048176/Brain Extraction/smaller_dataset/train/images/*'))
-    t1_trainy = sorted(glob('C:/Users/C21048176/Brain Extraction/smaller_dataset/train/labels/*'))
     
-    t1_valx = sorted(glob('C:/Users/C21048176/Brain Extraction/smaller_dataset/validate/images/*'))
-    t1_valy = sorted(glob('C:/Users/C21048176/Brain Extraction/smaller_dataset/validate/labels/*'))
-    """ 
-    t1_trainx = sorted(glob('C:/Users/C21048176/Brain Extraction/Dataset/T1/train/images/*'))
-    t1gd_trainx = sorted(glob('C:/Users/C21048176/Brain Extraction/Dataset/T1Gd/train/images/*'))
-    t2_trainx = sorted(glob('C:/Users/C21048176/Brain Extraction/Dataset/T2/train/images/*'))
-    flair_trainx = sorted(glob('C:/Users/C21048176/Brain Extraction/Dataset/Flair/train/images/*'))
+    t1_trainx = sorted(glob('Dataset/T1/train/images/*'))
+    t1gd_trainx = sorted(glob('Dataset/T1Gd/train/images/*'))
+    t2_trainx = sorted(glob('Dataset/T2/train/images/*'))
+    flair_trainx = sorted(glob('Dataset/Flair/train/images/*'))
     
-    t1_trainy = sorted(glob('C:/Users/C21048176/Brain Extraction/Dataset/T1/train/labels/*'))
-    t1gd_trainy = sorted(glob('C:/Users/C21048176/Brain Extraction/Dataset/T1Gd/train/labels/*'))
-    t2_trainy = sorted(glob('C:/Users/C21048176/Brain Extraction/Dataset/T2/train/labels/*'))
-    flair_trainy = sorted(glob('C:/Users/C21048176/Brain Extraction/Dataset/Flair/train/labels/*'))
+    t1_trainy = sorted(glob('Dataset/T1/train/labels/*'))
+    t1gd_trainy = sorted(glob('Dataset/T1Gd/train/labels/*'))
+    t2_trainy = sorted(glob('Dataset/T2/train/labels/*'))
+    flair_trainy = sorted(glob('Dataset/Flair/train/labels/*'))
     
-    t1_valx = sorted(glob('C:/Users/C21048176/Brain Extraction/Dataset/T1/validation/images/*'))
-    t1gd_valx = sorted(glob('C:/Users/C21048176/Brain Extraction/Dataset/T1Gd/validation/images/*'))
-    t2_valx = sorted(glob('C:/Users/C21048176/Brain Extraction/Dataset/T2/validation/images/*'))
-    flair_valx = sorted(glob('C:/Users/C21048176/Brain Extraction/Dataset/Flair/validation/images/*'))
+    t1_valx = sorted(glob('Dataset/T1/validation/images/*'))
+    t1gd_valx = sorted(glob('Dataset/T1Gd/validation/images/*'))
+    t2_valx = sorted(glob('Dataset/T2/validation/images/*'))
+    flair_valx = sorted(glob('Dataset/Flair/validation/images/*'))
     
-    t1_valy = sorted(glob('C:/Users/C21048176/Brain Extraction/Dataset/T1/validation/labels/*'))
-    t1gd_valy = sorted(glob('C:/Users/C21048176/Brain Extraction/Dataset/T1Gd/validation/labels/*'))
-    t2_valy = sorted(glob('C:/Users/C21048176/Brain Extraction/Dataset/T2/validation/labels/*'))
-    flair_valy = sorted(glob('C:/Users/C21048176/Brain Extraction/Dataset/Flair/validation/labels/*'))
-    """
+    t1_valy = sorted(glob('Dataset/T1/validation/labels/*'))
+    t1gd_valy = sorted(glob('Dataset/T1Gd/validation/labels/*'))
+    t2_valy = sorted(glob('Dataset/T2/validation/labels/*'))
+    flair_valy = sorted(glob('Dataset/Flair/validation/labels/*'))
+
     
     """ Load dataset """
-    train_x = t1_trainx #+ t1gd_trainx + t2_trainx + flair_trainx
-    train_y = t1_trainy #+ t1gd_trainy + t2_trainy + flair_trainy
+    train_x = t1_trainx + t1gd_trainx + t2_trainx + flair_trainx
+    train_y = t1_trainy + t1gd_trainy + t2_trainy + flair_trainy
     
-    valid_x = t1_valx #+ t1gd_valx + t2_valx + flair_valx
-    valid_y = t1_valy #+ t1gd_valy + t2_valy + flair_valy
+    valid_x = t1_valx + t1gd_valx + t2_valx + flair_valx
+    valid_y = t1_valy + t1gd_valy + t2_valy + flair_valy
     
     train_dataset = GetData(train_x, train_y, transform=train_transform)
     valid_dataset = GetData(valid_x, valid_y, transform=transform)
@@ -161,7 +158,10 @@ if __name__ == '__main__':
         if early_stopper.early_stop(validLoss):             
             break
         
-    print(s.mean(epoch_time))
+    mean_epochtime = s.mean(epoch_time)
+    elapsed_mins = int(mean_epochtime / 60)
+    elapsed_secs = int(mean_epochtime - (elapsed_mins * 60))
+    print(f'Average Epoch Time: {epoch_mins}m {epoch_secs}s\n')
     np.savetxt(results+'epoch_Time.txt', epoch_time)
     """ Plot """
     utils.plot_loss(train_loss, val_loss)
