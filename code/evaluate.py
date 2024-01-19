@@ -7,8 +7,10 @@ from torch.utils.data import DataLoader
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 import numpy as np
+import time
 
-from Unet import UNet
+from rgunetv5 import RGUNetv5
+from lighterunet import LighterUnet
 import os
 
 import nibabel as nib
@@ -92,12 +94,12 @@ if __name__ == '__main__':
     """ Seeding """
     utils.seeding(28)
     
-    checkpoint_path = 'checkpoint/Unet_all/checpoint.pth' # change this 
-    nifti_results = 'C:/Users/C21048176/Brain Extraction/nifti_results/unet_full/'
+    checkpoint_path = 'checkpoint/proposed/lighterunet/checpoint.pth' # change this 
+    nifti_results = 'nifti_results/proposed/lighterunet/'
     
     """ model """
     device = torch.device('cuda')
-    model = UNet()
+    model = LighterUnet()
     model = model.to(device)
     model.load_state_dict(torch.load(checkpoint_path, map_location=device))
     
@@ -108,24 +110,28 @@ if __name__ == '__main__':
             ToTensorV2()
             ])
     
-    test_x = 
+    test_x = ['Dataset/T1/test/images/*',
+              'Dataset/T1Gd/test/images/*',
+              'Dataset/T2/test/images/*',
+              'Dataset/Flair/test/images/*']
     
-    test_y = ['C:/Users/C21048176/Brain Extraction/Dataset/T1/test/labels/*',
-              'C:/Users/C21048176/Brain Extraction/Dataset/T1Gd/test/labels/*',
-              'C:/Users/C21048176/Brain Extraction/Dataset/T2/test/labels/*',
-              'C:/Users/C21048176/Brain Extraction/Dataset/Flair/test/labels/*']
+    test_y = ['Dataset/T1/test/labels/*',
+              'Dataset/T1Gd/test/labels/*',
+              'Dataset/T2/test/labels/*',
+              'Dataset/Flair/test/labels/*']
     
     outputs = ['T1', 'T1Gd', 'T2', 'FLAIR']
     
-    gt = [glob('C:/Users/C21048176/Brain Extraction/data/T1/Test/labels/*'),
-          glob('C:/Users/C21048176/Brain Extraction/data/T1Gd/Test/labels/*'),
-          glob('C:/Users/C21048176/Brain Extraction/data/T2/Test/labels/*'),
-          glob('C:/Users/C21048176/Brain Extraction/data/Flair/Test/labels/*')]
-    
+    gts = ['data/T1/Test/labels/*',
+          'data/T1Gd/Test/labels/*',
+          'data/T2/Test/labels/*',
+          'data/Flair/Test/labels/*']
+    times=[]
     for i in range(len(test_x)):
         x = sort_files(glob(test_x[i]))
         y = sort_files(glob(test_y[i]))
         out_path = nifti_results + outputs[i] + '/'
+        
         
         test_dataset = GetData(x, y, transform=transform) 
         
@@ -136,11 +142,15 @@ if __name__ == '__main__':
             num_workers=2
             )
         
+        start_time = time.time()
         testinge_loop(model, test_loader, out_path)
+        end_time = time.time()
         
-        predicted = sorted(glob(out_path + '*'))
+        times.append(end_time - start_time)     
+        
+        predicted = sorted(glob(out_path + '*.nii.gz'))
         predicted.sort(key=lambda x: int(x.split('\\')[-1].split('.')[0]))
-        ground_truth = sorted(glob('C:/Users/C21048176/Brain Extraction/data/Flair/Test/labels/*'))
+        ground_truth = sorted(glob(gts[i]))
         
         dices = []
         precisions = []
@@ -170,6 +180,8 @@ if __name__ == '__main__':
         np.savetxt(out_path+'dice.txt', dices)
         np.savetxt(out_path+'precision.txt', precisions)
         np.savetxt(out_path+'recall.txt', recalls)
+        
+    np.savetxt(nifti_results+'times.txt', times)
         
     
             
