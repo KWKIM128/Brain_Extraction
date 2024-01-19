@@ -11,3 +11,4 @@ Implements residual module to GU-Net architecture to decrease conversion time.
 Asymetrical encoder-decoder architecture to produce more arcuate predicted whilst further decreasing the number of parameters in the model.
 
 Python 3.9.18
+PyTorch 2.1.0
