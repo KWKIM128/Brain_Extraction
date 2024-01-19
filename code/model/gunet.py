@@ -28,51 +28,41 @@ class Ghost_Module(nn.Module):
         x2 = self.bn2(x2)
         x2 = self.leakyrelu(x2)
         out = torch.cat([x1, x2], dim=1)
+        
         return out[:, :self.oup, :, :]
-    
-class Residual_block(nn.Module):
-    def __init__(self, in_c, out_c):
-        super(Residual_block, self).__init__()
- 
-        self.ghost1 = Ghost_Module(in_c, out_c)
-        self.match_channels = nn.Conv2d(in_c, out_c, kernel_size=1)
- 
-    def forward(self, x):
-        x1 = self.ghost1(x)
-        inputs = self.match_channels(x)
-        x2 = x1 + inputs
-        return x2
     
 class Encoder_block(nn.Module):
     def __init__(self, in_c, out_c):
         super().__init__()
  
-        self.res = Residual_block(in_c, out_c)
+        self.ghost = Ghost_Module(in_c, out_c)
         self.pool = nn.MaxPool2d((2, 2))
  
     def forward(self, inputs):
-        x = self.res(inputs)
+        x = self.ghost(inputs)
         p = self.pool(x)
  
         return x, p
+    
+    
 class Decoder_block(nn.Module):
     def __init__(self, in_c, out_c):
         super().__init__()
  
-        self.up = nn.ConvTranspose2d(in_c, out_c, kernel_size=2, stride=2, padding=0)
-        self.res = Residual_block(out_c + out_c, out_c)
+        self.up = nn.ConvTranspose2d(in_c, out_c, kernel_size=2, stride=2, 
+                                     padding=0)
+        self.ghost = Ghost_Module(out_c + out_c, out_c)
         self.bn = nn.BatchNorm2d(out_c)
         self.relu = nn.LeakyReLU(inplace=True)
  
     def forward(self, inputs, skip):
         x = self.up(inputs)
         x = torch.cat([x, skip], dim=1)
-        x = self.res(x)
-        #x = self.bn(x)
-        #x = self.relu(x)
+        x = self.ghost(x)
+
         return x
  
-class RGUNet(nn.Module):
+class GUNet(nn.Module):
     def __init__(self):
         super().__init__()
  
@@ -82,7 +72,7 @@ class RGUNet(nn.Module):
         self.e3 = Encoder_block(64, 128)
  
         """ Bottleneck """
-        self.b = Residual_block(128, 256)
+        self.b = Ghost_Module(128, 256)
  
         """ Decoder """
         self.d1 = Decoder_block(256, 128)
@@ -91,7 +81,6 @@ class RGUNet(nn.Module):
  
         """ Classifier """
         self.outputs = nn.Conv2d(32, 1, kernel_size=1, padding=0)
-        self.sigmoid = nn.Sigmoid()  # Add a sigmoid activation for binary segmentation
  
     def forward(self, inputs):
         """ Encoder """
@@ -114,5 +103,5 @@ class RGUNet(nn.Module):
     
 if __name__ == '__main__':
  
-    model = RGUNet()
+    model = GUNet()
     summary(model, (3, 240, 240))

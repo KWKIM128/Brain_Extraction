@@ -46,7 +46,7 @@ class Residual_block(nn.Module):
 class Encoder_block(nn.Module):
     def __init__(self, in_c, out_c):
         super().__init__()
- 
+        
         self.res = Residual_block(in_c, out_c)
         self.pool = nn.MaxPool2d((2, 2))
  
@@ -55,24 +55,33 @@ class Encoder_block(nn.Module):
         p = self.pool(x)
  
         return x, p
+    
 class Decoder_block(nn.Module):
     def __init__(self, in_c, out_c):
         super().__init__()
  
         self.up = nn.ConvTranspose2d(in_c, out_c, kernel_size=2, stride=2, padding=0)
-        self.res = Residual_block(out_c + out_c, out_c)
+        self.dwconv1 = nn.Conv2d(in_c, out_c, kernel_size=3, stride = 1, 
+                              padding=3 // 2, groups=out_c, bias=False)
+        self.dwconv2 = nn.Conv2d(out_c, out_c, kernel_size=3, stride = 1, 
+                              padding=3 // 2, groups=out_c, bias=False)
+        self.res = Residual_block(out_c, out_c)
         self.bn = nn.BatchNorm2d(out_c)
-        self.relu = nn.LeakyReLU(inplace=True)
+        self.leakyrelu = nn.LeakyReLU(inplace=True)
  
     def forward(self, inputs, skip):
         x = self.up(inputs)
         x = torch.cat([x, skip], dim=1)
+        x = self.leakyrelu(x)
+        x = self.dwconv1(x)
+        x = self.leakyrelu(x)
+        x = self.dwconv2(x)
+        x = self.leakyrelu(x)
         x = self.res(x)
-        #x = self.bn(x)
-        #x = self.relu(x)
+
         return x
  
-class RGUNet(nn.Module):
+class RGUNetv5(nn.Module):
     def __init__(self):
         super().__init__()
  
@@ -114,5 +123,5 @@ class RGUNet(nn.Module):
     
 if __name__ == '__main__':
  
-    model = RGUNet()
+    model = RGUNetv5()
     summary(model, (3, 240, 240))
