@@ -81,7 +81,7 @@ class Decoder_block(nn.Module):
 
         return x
  
-class RGUNetv5(nn.Module):
+class RGUNetv2(nn.Module):
     def __init__(self):
         super().__init__()
  
