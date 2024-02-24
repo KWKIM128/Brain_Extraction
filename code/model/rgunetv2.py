@@ -123,5 +123,5 @@ class RGUNetv2(nn.Module):
     
 if __name__ == '__main__':
  
-    model = RGUNetv5()
+    model = RGUNetv2()
     summary(model, (3, 240, 240))
