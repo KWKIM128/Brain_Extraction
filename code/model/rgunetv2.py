@@ -18,7 +18,7 @@ class Ghost_Module(nn.Module):
                                     groups=init_channels, bias=False)
         self.bn1 = nn.BatchNorm2d(init_channels)
         self.bn2 = nn.BatchNorm2d(new_channels)
-        self.leakyrelu = nn.LeakyReLU()
+        self.leakyrelu = nn.LeakyReLU(inplace=True)
 
     def forward(self, x):
         x1 = self.conv(x)
