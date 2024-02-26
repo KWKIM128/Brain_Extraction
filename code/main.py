@@ -1,20 +1,23 @@
-from glob import glob
 import time
+import statistics as s
+import numpy as np
+
 import torch
+from torch.utils.data import DataLoader
+from torchsummary import summary
+
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
+
+from glob import glob
+
 import utils
 from dataloader import GetData
 from loss import DiceLoss
-from torch.utils.data import DataLoader
-import albumentations as A
-from albumentations.pytorch import ToTensorV2
-import statistics as s
-from torchsummary import summary
-import numpy as np
-
-from rgunetv2 import RGUNetv2
-from lighterunet import LighterUnet
 from rgunet import RGUNet
 from gunet import GUNet
+from lighterunet import LighterUnet
+from rgunetv2 import RGUNetv2
 
 if __name__ == '__main__':
     """ Seeding """
