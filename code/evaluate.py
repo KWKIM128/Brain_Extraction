@@ -1,22 +1,23 @@
-from glob import glob
+import os
+import statistics as s
+import matplotlib.pyplot as plt
+
+import numpy as np
 import torch
-import utils
-from dataloader import GetData
-from loss import dice_metrics, precision_metrics, recall_metrics
+import nibabel as nib
 from torch.utils.data import DataLoader
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
-import numpy as np
-import time
+from glob import glob
 
-from rgunetv5 import RGUNetv5
+from dataloader import GetData
+from loss import dice_metrics, precision_metrics, recall_metrics
+import utils
+from rgunet import RGUNet
+from gunet import GUNet
 from lighterunet import LighterUnet
-import os
+from rgunetv2 import RGUNetv2
 
-import nibabel as nib
-
-import statistics as s
-import matplotlib.pyplot as plt
 
 def sort_files(items):
     keys = []
@@ -94,12 +95,12 @@ if __name__ == '__main__':
     """ Seeding """
     utils.seeding(28)
     
-    checkpoint_path = 'checkpoint/proposed/lighterunet/checpoint.pth' # change this 
-    nifti_results = 'nifti_results/proposed/lighterunet/'
+    checkpoint_path = '' # change this 
+    nifti_results = ''
     
     """ model """
     device = torch.device('cuda')
-    model = LighterUnet()
+    model = # load model
     model = model.to(device)
     model.load_state_dict(torch.load(checkpoint_path, map_location=device))
     
@@ -126,7 +127,7 @@ if __name__ == '__main__':
           'data/T1Gd/Test/labels/*',
           'data/T2/Test/labels/*',
           'data/Flair/Test/labels/*']
-    times=[]
+
     for i in range(len(test_x)):
         x = sort_files(glob(test_x[i]))
         y = sort_files(glob(test_y[i]))
@@ -142,11 +143,8 @@ if __name__ == '__main__':
             num_workers=2
             )
         
-        start_time = time.time()
         testinge_loop(model, test_loader, out_path)
-        end_time = time.time()
-        
-        times.append(end_time - start_time)     
+            
         
         predicted = sorted(glob(out_path + '*.nii.gz'))
         predicted.sort(key=lambda x: int(x.split('\\')[-1].split('.')[0]))
@@ -181,7 +179,6 @@ if __name__ == '__main__':
         np.savetxt(out_path+'precision.txt', precisions)
         np.savetxt(out_path+'recall.txt', recalls)
         
-    np.savetxt(nifti_results+'times.txt', times)
         
     
             
