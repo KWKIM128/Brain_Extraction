@@ -11,9 +11,10 @@ import statistics as s
 from torchsummary import summary
 import numpy as np
 
-from rgunetv5 import RGUNetv5
+from rgunetv2 import RGUNetv2
 from lighterunet import LighterUnet
 from rgunet import RGUNet
+from gunet import GUNet
 
 if __name__ == '__main__':
     """ Seeding """
@@ -26,12 +27,12 @@ if __name__ == '__main__':
     
     """ model """
     device = torch.device('cuda')
-    model = RGUNet()
+    model = RGUNetv2()
     model = model.to(device)
     
     """ Path """
-    checkpoint_path = 'checkpoint/proposed/rgunet/checpoint.pth' # change this 
-    results = 'nifti_results/proposed/rgunet/train/'
+    checkpoint_path = '' # change this 
+    results = ''
     
     """Transform"""
     train_transform = A.Compose(
