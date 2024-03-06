@@ -14,17 +14,18 @@ def post_processing(mask):
     
     Original code: https://github.com/MICLab-Unicamp/CONSNet/blob/master/infer.py
     """
-  
     # Threshold to get rid of noise
-    mask = np.where(mask >= 0.5, 1, 0)
+    mask = np.where(mask >= 0.85, 1, 0)
+
     labels, n = ndi.measurements.label(mask)
     hist = np.histogram(labels.flat, bins=(n + 1), range=(-0.5, n + 0.5))[0]
     i = np.argmax(hist[1:]) + 1
-    mask = (mask != i).astype(np.uint8)
-    mask, n = ndi.measurements.label(mask)
-    hist = np.histogram(mask.flat, bins=(n + 1), range=(-0.5, n + 0.5))[0]
+    mask = (labels != i).astype(np.uint8)
+
+    labels, n = ndi.measurements.label(mask)
+    hist = np.histogram(labels.flat, bins=(n + 1), range=(-0.5, n + 0.5))[0]
     i = np.argmax(hist[1:]) + 1
-    return (mask != i).astype(np.uint8)
+    return (labels != i).astype(np.uint8)
  
 def applying_mask (original_scan, mask, output_path):
   
