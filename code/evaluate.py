@@ -14,10 +14,6 @@ from dataloader import GetData
 from loss import dice_metrics, precision_metrics, recall_metrics
 import utils
 from rgunet import RGUNet
-from gunet import GUNet
-from lighterunet import LighterUnet
-from rgunetv2 import RGUNetv2
-
 
 def sort_files(items):
     keys = []
@@ -100,7 +96,7 @@ if __name__ == '__main__':
     
     """ model """
     device = torch.device('cuda')
-    model = # load model
+    model = RGUNet # load model
     model = model.to(device)
     model.load_state_dict(torch.load(checkpoint_path, map_location=device))
     
