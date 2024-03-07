@@ -15,9 +15,6 @@ import utils
 from dataloader import GetData
 from loss import DiceLoss
 from rgunet import RGUNet
-from gunet import GUNet
-from lighterunet import LighterUnet
-from rgunetv2 import RGUNetv2
 
 if __name__ == '__main__':
     """ Seeding """
@@ -30,7 +27,7 @@ if __name__ == '__main__':
     
     """ model """
     device = torch.device('cuda')
-    model = RGUNetv2()
+    model = RGUNet()
     model = model.to(device)
     
     """ Path """
