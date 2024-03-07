@@ -81,7 +81,7 @@ class Decoder_block(nn.Module):
 
         return x
  
-class RGUNetv2(nn.Module):
+class RGUNet(nn.Module):
     def __init__(self):
         super().__init__()
  
@@ -123,5 +123,5 @@ class RGUNetv2(nn.Module):
     
 if __name__ == '__main__':
  
-    model = RGUNetv2()
+    model = RGUNet()
     summary(model, (3, 240, 240))
