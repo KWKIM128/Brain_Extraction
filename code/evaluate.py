@@ -2,23 +2,15 @@
 Apply post-processing before evaluating the predicted masks.
 """
 from glob import glob
-from loss import dice_metrics, precision_metrics, recall_metrics
 import numpy as np
-
-from rgunetv5 import ARGUNet
-from lighterunet import LighterUnet
-import os
-from rgunet import RGUNet
-from gunet import GUNet
-
-
 import nibabel as nib
-
 import statistics as s
+
+from loss import dice_metrics, precision_metrics, recall_metrics
 
 if __name__ == '__main__':
 
-    nifti_results = 'post_processed/Unet/'
+    nifti_results = 'post_processed/rgunet/'
     
     outputs = ['T1', 'T1Gd', 'T2', 'FLAIR']
     
@@ -57,3 +49,7 @@ if __name__ == '__main__':
         print(outputs[i])
         print(s.median(dices))
         print(s.stdev(dices))
+        
+        np.savetxt(out_path+'dice.txt', dices)
+        np.savetxt(out_path+'precision.txt', precisions)
+        np.savetxt(out_path+'recall.txt', recalls)
