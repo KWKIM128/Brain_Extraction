@@ -1,3 +1,4 @@
+# RGU-Net without residual path
 import torch
 import torch.nn as nn
 import math
