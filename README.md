@@ -5,5 +5,5 @@ This model was developed as part of my undergraduate dissertation and iterative 
 <p align="center">
   <img src="https://github.com/KWKIM128/Pneumonia-Detection/assets/115262940/b16b5996-07c9-4ef3-b0d4-287ca02daba4" />
 </p>
-<p align="center"> Figure 1. Pneumonia Dataset
+<p align="center"> Figure 1. Sample results of RGU-Net
   
